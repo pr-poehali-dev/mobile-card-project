@@ -41,6 +41,16 @@ interface Supplier {
     time: string;
     cost: number;
   };
+  warehouses: {
+    name: string;
+    stock: number;
+    price: number;
+  }[];
+  priceTypes: {
+    type: string;
+    price: number;
+    description: string;
+  }[];
 }
 
 interface CartItem {
@@ -51,22 +61,6 @@ interface CartItem {
 }
 
 const models: ProductModel[] = [
-  {
-    id: 'air-m1',
-    name: 'MacBook Air M1',
-    price: 99990,
-    originalPrice: 119990,
-    specs: {
-      processor: 'Apple M1 (8 ядер)',
-      memory: '8 ГБ',
-      storage: '256 ГБ SSD',
-      display: '13.3" Retina',
-      graphics: 'Встроенная 7-ядерная',
-      battery: 'До 18 часов',
-      weight: '1.29 кг'
-    },
-    features: ['Touch ID', 'Magic Keyboard', 'Force Touch трекпад', 'Thunderbolt 3']
-  },
   {
     id: 'air-m2',
     name: 'MacBook Air M2',
@@ -82,21 +76,6 @@ const models: ProductModel[] = [
       weight: '1.24 кг'
     },
     features: ['Touch ID', 'Magic Keyboard', 'MagSafe 3', 'Thunderbolt 4']
-  },
-  {
-    id: 'pro-m3',
-    name: 'MacBook Pro M3',
-    price: 199990,
-    specs: {
-      processor: 'Apple M3 (8 ядер)',
-      memory: '16 ГБ',
-      storage: '512 ГБ SSD',
-      display: '14" Liquid Retina XDR',
-      graphics: 'Встроенная 10-ядерная',
-      battery: 'До 22 часов',
-      weight: '1.55 кг'
-    },
-    features: ['Touch ID', 'Magic Keyboard', 'MagSafe 3', 'Thunderbolt 4', 'HDMI', 'SDXC']
   }
 ];
 
@@ -117,7 +96,26 @@ const suppliers: Supplier[] = [
     delivery: {
       time: '1-2 дня',
       cost: 0
-    }
+    },
+    warehouses: [
+      { name: 'склад transit', stock: 120, price: 233456.43 },
+      { name: 'склад autoinstant', stock: 0, price: 233456.43 },
+      { name: 'склад local', stock: 0, price: 233456.43 },
+      { name: 'склад shipmentcity', stock: 0, price: 233456.43 },
+      { name: 'склад reserve', stock: 0, price: 233456.43 },
+      { name: 'склад transitco', stock: 0, price: 233456.43 },
+      { name: 'склад internalmovemrent', stock: 0, price: 233456.43 }
+    ],
+    priceTypes: [
+      { type: 'цена товара в прайслисте(rub)', price: 0, description: 'Основная цена' },
+      { type: 'цена товара в прайслисте(usd)', price: 3979, description: 'Цена в долларах' },
+      { type: 'цена товара в заказе(rub)', price: 394384.50, description: 'Оптовая цена' },
+      { type: 'цена товара в заказе(usd)', price: 394384.50, description: 'Оптовая цена USD' },
+      { type: 'рекомендованная производителем розничная цена(rub)', price: 0, description: 'РРЦ рубли' },
+      { type: 'рекомендованная производителем розничная цена(usd)', price: 0, description: 'РРЦ доллары' },
+      { type: 'рекомендованная розничная цена для онлайн-продаж(rub)', price: 0, description: 'Онлайн РРЦ рубли' },
+      { type: 'рекомендованная розничная цена для онлайн-продаж(usd)', price: 0, description: 'Онлайн РРЦ доллары' }
+    ]
   },
   {
     id: 'ocs',
@@ -135,32 +133,32 @@ const suppliers: Supplier[] = [
     delivery: {
       time: '2-3 дня',
       cost: 500
-    }
-  },
-  {
-    id: 'techno',
-    name: 'TechnoMarket',
-    logo: '🔧',
-    rating: 4.4,
-    stock: 15,
-    prices: {
-      retail: 275000,
-      wholesale: 260000,
-      withNds: 300000,
-      withoutNds: 300000
     },
-    minOrder: 2,
-    delivery: {
-      time: '3-5 дней',
-      cost: 800
-    }
+    warehouses: [
+      { name: 'склад CO', stock: 10, price: 273456.43 },
+      { name: 'склад local', stock: 0, price: 273456.43 },
+      { name: 'склад shipmentcity', stock: 0, price: 273456.43 },
+      { name: 'склад reserve', stock: 0, price: 273456.43 },
+      { name: 'склад transitco', stock: 0, price: 273456.43 },
+      { name: 'склад internalmovemrent', stock: 0, price: 273456.43 }
+    ],
+    priceTypes: [
+      { type: 'цена товара в прайслисте(rub)', price: 2979, description: 'Основная цена' },
+      { type: 'цена товара в прайслисте(usd)', price: 294384.50, description: 'Цена в долларах' },
+      { type: 'цена товара в заказе(rub)', price: 294384.50, description: 'Оптовая цена' },
+      { type: 'рекомендованная производителем розничная цена(rub)', price: 0, description: 'РРЦ рубли' },
+      { type: 'рекомендованная производителем розничная цена(usd)', price: 0, description: 'РРЦ доллары' },
+      { type: 'рекомендованная розничная цена для онлайн-продаж(rub)', price: 0, description: 'Онлайн РРЦ рубли' },
+      { type: 'рекомендованная розничная цена для онлайн-продаж(usd)', price: 0, description: 'Онлайн РРЦ доллары' }
+    ]
   }
 ];
 
 const Index = () => {
-  const [selectedModel, setSelectedModel] = useState<string>('air-m2');
+  const selectedModel = 'air-m2'; // фиксированная модель
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCart, setShowCart] = useState<boolean>(false);
+  const [expandedSupplier, setExpandedSupplier] = useState<string | null>(null);
 
   const currentModel = models.find(m => m.id === selectedModel);
 
@@ -233,16 +231,17 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-md mx-auto space-y-6 lg:max-w-4xl">
-        <div className="lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 space-y-6">
+      <div className="max-w-md mx-auto space-y-6 lg:max-w-6xl">
+        <div className="lg:grid lg:grid-cols-3 lg:gap-8 lg:space-y-0 space-y-6">
+          
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6 lg:col-span-2">
+        <div className="flex items-center gap-4 mb-6 lg:col-span-3">
           <Icon name="Apple" size={32} />
           <h1 className="text-2xl font-bold text-gray-900">Apple</h1>
         </div>
 
         {/* Product Image & Basic Info */}
-        <Card className="overflow-hidden animate-fade-in">
+        <Card className="overflow-hidden animate-fade-in lg:col-span-1">
           <CardContent className="p-6">
             <div className="text-center mb-6">
               <div className="group overflow-hidden rounded-lg mb-4">
@@ -255,26 +254,29 @@ const Index = () => {
               <h2 className="text-xl font-bold text-gray-900 mb-2 animate-slide-up">
                 {currentModel?.name}
               </h2>
+              <div className="text-sm text-gray-600 mb-4">
+                {currentModel?.specs.processor} • {currentModel?.specs.memory} • {currentModel?.specs.storage}
+              </div>
               <div className="flex items-center justify-center gap-2 mb-4 animate-slide-up">
-                {currentModel?.originalPrice && (
-                  <span className="text-lg text-gray-500 line-through">
-                    {formatPrice(currentModel.originalPrice)}
-                  </span>
-                )}
+                <span className="text-lg text-gray-600">от</span>
                 <span className="text-2xl font-bold text-blue-600">
-                  {currentModel && formatPrice(currentModel.price)}
+                  {formatPrice(Math.min(...suppliers.map(s => s.prices.wholesale)))}
                 </span>
               </div>
               <Badge variant="secondary" className="mb-4 animate-scale-in">
-                В наличии
+                В наличии у {suppliers.filter(s => s.stock > 0).length} поставщиков
               </Badge>
             </div>
 
             {/* Quick Actions */}
             <div className="flex gap-2 mb-4 animate-slide-up">
-              <Button className="flex-1 transition-all duration-200 hover:shadow-lg hover:scale-105">
-                <Icon name="ShoppingCart" size={18} className="mr-2" />
-                Купить
+              <Button 
+                variant="outline"
+                className="flex-1 transition-all duration-200 hover:shadow-lg hover:scale-105"
+                onClick={() => setShowCart(true)}
+              >
+                <Icon name="Eye" size={18} className="mr-2" />
+                Посмотреть поставщиков
               </Button>
               <Button variant="outline" size="icon" className="transition-all duration-200 hover:scale-110 hover:text-red-500">
                 <Icon name="Heart" size={18} />
@@ -286,143 +288,154 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        {/* Model Selection */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Выбор модели</CardTitle>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowCart(!showCart)}
-              >
-                <Icon name="ShoppingCart" size={16} className="mr-2" />
-                Корзина ({getTotalCartItems()})
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {models.map((model) => (
-                <Card 
-                  key={model.id}
-                  className={`cursor-pointer transition-all duration-300 hover:shadow-md ${
-                    selectedModel === model.id ? 'ring-2 ring-blue-500 scale-105' : 'hover:scale-102'
-                  }`}
-                  onClick={() => setSelectedModel(model.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold">{model.name}</h3>
-                      <div className="text-right">
-                        {model.originalPrice && (
-                          <div className="text-sm text-gray-500 line-through">
-                            {formatPrice(model.originalPrice)}
-                          </div>
-                        )}
-                        <div className="font-bold text-blue-600">
-                          от {formatPrice(Math.min(...suppliers.map(s => s.prices.wholesale)))}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {model.specs.processor} • {model.specs.memory} • {model.specs.storage}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Suppliers Table */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Поставщики</CardTitle>
-            <p className="text-sm text-gray-600">Выберите поставщика для модели {currentModel?.name}</p>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-gray-50">
-                    <th className="text-left p-3 font-medium">Поставщик</th>
-                    <th className="text-center p-3 font-medium">Остаток</th>
-                    <th className="text-center p-3 font-medium">Цена опт</th>
-                    <th className="text-center p-3 font-medium">НДС %</th>
-                    <th className="text-center p-3 font-medium">Действия</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {suppliers.map((supplier) => {
-                    const cartQuantity = getCartQuantity(supplier.id);
-                    return (
-                      <tr key={supplier.id} className="border-b hover:bg-gray-50 transition-colors">
-                        <td className="p-3">
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{supplier.logo}</span>
-                            <div>
-                              <div className="font-semibold">{supplier.name}</div>
-                              <div className="text-xs text-gray-500">
-                                ⭐ {supplier.rating} • {supplier.delivery.time}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-3 text-center">
+        {/* Suppliers Cards */}
+        <div className="space-y-4 lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-bold text-gray-900">Поставщики товара</h2>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowCart(!showCart)}
+            >
+              <Icon name="ShoppingCart" size={16} className="mr-2" />
+              Корзина ({getTotalCartItems()})
+            </Button>
+          </div>
+          
+          {suppliers.map((supplier) => {
+            const cartQuantity = getCartQuantity(supplier.id);
+            const isExpanded = expandedSupplier === supplier.id;
+            
+            return (
+              <Card key={supplier.id} className="overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">{supplier.logo}</span>
+                      <div>
+                        <h3 className="font-bold text-lg">{supplier.name}</h3>
+                        <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <span>⭐ {supplier.rating}</span>
+                          <span>🚚 {supplier.delivery.time}</span>
                           <Badge variant={supplier.stock > 10 ? 'default' : 'destructive'}>
                             {supplier.stock} шт.
                           </Badge>
-                        </td>
-                        <td className="p-3 text-center font-semibold text-blue-600">
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500">Цена опт</div>
+                        <div className="text-xl font-bold text-blue-600">
                           {formatPrice(supplier.prices.wholesale)}
-                        </td>
-                        <td className="p-3 text-center">20%</td>
-                        <td className="p-3">
-                          <div className="flex items-center justify-center gap-2">
-                            {cartQuantity > 0 ? (
-                              <div className="flex items-center gap-1">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => updateCartQuantity(supplier.id, cartQuantity - 1)}
-                                >
-                                  <Icon name="Minus" size={14} />
-                                </Button>
-                                <span className="mx-2 min-w-[20px] text-center">{cartQuantity}</span>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => updateCartQuantity(supplier.id, cartQuantity + 1)}
-                                  disabled={cartQuantity >= supplier.stock}
-                                >
-                                  <Icon name="Plus" size={14} />
-                                </Button>
+                        </div>
+                        <div className="text-xs text-gray-500">НДС 20%</div>
+                      </div>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setExpandedSupplier(isExpanded ? null : supplier.id)}
+                      >
+                        <Icon name={isExpanded ? "ChevronUp" : "ChevronDown"} size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">
+                      Мин. заказ: {supplier.minOrder} шт. • Доставка: {supplier.delivery.cost === 0 ? 'бесплатно' : formatPrice(supplier.delivery.cost)}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      {cartQuantity > 0 ? (
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => updateCartQuantity(supplier.id, cartQuantity - 1)}
+                          >
+                            <Icon name="Minus" size={14} />
+                          </Button>
+                          <span className="mx-2 min-w-[30px] text-center font-semibold">{cartQuantity}</span>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => updateCartQuantity(supplier.id, cartQuantity + 1)}
+                            disabled={cartQuantity >= supplier.stock}
+                          >
+                            <Icon name="Plus" size={14} />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button 
+                          onClick={() => addToCart(supplier.id)}
+                          disabled={supplier.stock === 0}
+                        >
+                          <Icon name="ShoppingCart" size={16} className="mr-2" />
+                          В корзину
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div className="mt-4 pt-4 border-t animate-slide-up">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Типы цен */}
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2">
+                            <Icon name="DollarSign" size={16} />
+                            Типы цен
+                          </h4>
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {supplier.priceTypes.map((priceType, index) => (
+                              <div key={index} className="flex justify-between items-start text-sm bg-gray-50 p-3 rounded">
+                                <div className="flex-1 pr-2">
+                                  <div className="text-gray-700 font-medium">{priceType.type}</div>
+                                  <div className="text-xs text-gray-500 mt-1">{priceType.description}</div>
+                                </div>
+                                <span className="font-semibold text-blue-600">
+                                  {priceType.price === 0 ? '0,00 ₽' : formatPrice(priceType.price)}
+                                </span>
                               </div>
-                            ) : (
-                              <Button 
-                                size="sm"
-                                onClick={() => addToCart(supplier.id)}
-                                disabled={supplier.stock === 0}
-                              >
-                                <Icon name="Plus" size={14} className="mr-1" />
-                                Добавить
-                              </Button>
-                            )}
+                            ))}
                           </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+                        </div>
+                        
+                        {/* Склады */}
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2">
+                            <Icon name="Warehouse" size={16} />
+                            Наличие по складам
+                          </h4>
+                          <div className="space-y-2 max-h-48 overflow-y-auto">
+                            {supplier.warehouses.map((warehouse, index) => (
+                              <div key={index} className="flex justify-between items-center text-sm bg-gray-50 p-3 rounded">
+                                <span className="text-gray-700 font-medium">{warehouse.name}</span>
+                                <div className="flex items-center gap-2">
+                                  <Badge variant={warehouse.stock > 0 ? 'default' : 'secondary'}>
+                                    {warehouse.stock} шт.
+                                  </Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
 
         {/* Shopping Cart */}
         {showCart && cart.length > 0 && (
-          <Card className="animate-slide-up">
+          <Card className="animate-slide-up lg:col-span-3">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle className="text-lg">Корзина</CardTitle>
@@ -441,7 +454,7 @@ const Index = () => {
                   const supplier = suppliers.find(s => s.id === item.supplierId);
                   const model = models.find(m => m.id === item.modelId);
                   return (
-                    <div key={`${item.supplierId}-${item.modelId}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={`${item.supplierId}-${item.modelId}`} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center gap-3">
                         <span className="text-lg">{supplier?.logo}</span>
                         <div>
@@ -449,7 +462,7 @@ const Index = () => {
                           <div className="text-xs text-gray-600">{supplier?.name}</div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
                         <span className="text-sm">{item.quantity} шт.</span>
                         <span className="font-semibold text-blue-600">
                           {formatPrice(item.price * item.quantity)}
@@ -482,7 +495,7 @@ const Index = () => {
         )}
 
         {/* Main Content Tabs */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
         <Tabs defaultValue="specs" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="specs">Характеристики</TabsTrigger>
@@ -589,8 +602,6 @@ const Index = () => {
               </CardContent>
             </Card>
           </TabsContent>
-
-
         </Tabs>
         </div>
         </div>
