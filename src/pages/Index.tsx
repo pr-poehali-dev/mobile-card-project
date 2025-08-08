@@ -24,6 +24,32 @@ interface ProductModel {
   features: string[];
 }
 
+interface Supplier {
+  id: string;
+  name: string;
+  logo: string;
+  rating: number;
+  stock: number;
+  prices: {
+    retail: number;
+    wholesale: number;
+    withNds: number;
+    withoutNds: number;
+  };
+  minOrder: number;
+  delivery: {
+    time: string;
+    cost: number;
+  };
+}
+
+interface CartItem {
+  supplierId: string;
+  modelId: string;
+  quantity: number;
+  price: number;
+}
+
 const models: ProductModel[] = [
   {
     id: 'air-m1',
@@ -74,19 +100,126 @@ const models: ProductModel[] = [
   }
 ];
 
+const suppliers: Supplier[] = [
+  {
+    id: 'netlab',
+    name: 'NETLAB',
+    logo: '🖥️',
+    rating: 4.8,
+    stock: 27,
+    prices: {
+      retail: 263805.77,
+      wholesale: 233456.43,
+      withNds: 394384.50,
+      withoutNds: 394384.50
+    },
+    minOrder: 1,
+    delivery: {
+      time: '1-2 дня',
+      cost: 0
+    }
+  },
+  {
+    id: 'ocs',
+    name: 'OCS',
+    logo: '⚡',
+    rating: 4.6,
+    stock: 20,
+    prices: {
+      retail: 283805.77,
+      wholesale: 273456.43,
+      withNds: 294384.50,
+      withoutNds: 294384.50
+    },
+    minOrder: 1,
+    delivery: {
+      time: '2-3 дня',
+      cost: 500
+    }
+  },
+  {
+    id: 'techno',
+    name: 'TechnoMarket',
+    logo: '🔧',
+    rating: 4.4,
+    stock: 15,
+    prices: {
+      retail: 275000,
+      wholesale: 260000,
+      withNds: 300000,
+      withoutNds: 300000
+    },
+    minOrder: 2,
+    delivery: {
+      time: '3-5 дней',
+      cost: 800
+    }
+  }
+];
+
 const Index = () => {
   const [selectedModel, setSelectedModel] = useState<string>('air-m2');
-  const [compareMode, setCompareMode] = useState<boolean>(false);
-  const [compareModels, setCompareModels] = useState<string[]>(['air-m1', 'air-m2']);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [showCart, setShowCart] = useState<boolean>(false);
 
   const currentModel = models.find(m => m.id === selectedModel);
 
-  const toggleCompareModel = (modelId: string) => {
-    if (compareModels.includes(modelId)) {
-      setCompareModels(compareModels.filter(id => id !== modelId));
-    } else if (compareModels.length < 3) {
-      setCompareModels([...compareModels, modelId]);
+  const addToCart = (supplierId: string, quantity: number = 1) => {
+    const supplier = suppliers.find(s => s.id === supplierId);
+    if (!supplier) return;
+    
+    const existingItem = cart.find(item => 
+      item.supplierId === supplierId && item.modelId === selectedModel
+    );
+    
+    if (existingItem) {
+      setCart(cart.map(item =>
+        item.supplierId === supplierId && item.modelId === selectedModel
+          ? { ...item, quantity: item.quantity + quantity }
+          : item
+      ));
+    } else {
+      setCart([...cart, {
+        supplierId,
+        modelId: selectedModel,
+        quantity,
+        price: supplier.prices.wholesale
+      }]);
     }
+  };
+
+  const removeFromCart = (supplierId: string) => {
+    setCart(cart.filter(item => 
+      !(item.supplierId === supplierId && item.modelId === selectedModel)
+    ));
+  };
+
+  const updateCartQuantity = (supplierId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeFromCart(supplierId);
+      return;
+    }
+    
+    setCart(cart.map(item =>
+      item.supplierId === supplierId && item.modelId === selectedModel
+        ? { ...item, quantity }
+        : item
+    ));
+  };
+
+  const getCartQuantity = (supplierId: string) => {
+    const item = cart.find(item => 
+      item.supplierId === supplierId && item.modelId === selectedModel
+    );
+    return item ? item.quantity : 0;
+  };
+
+  const getTotalCartValue = () => {
+    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+  };
+
+  const getTotalCartItems = () => {
+    return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
   const formatPrice = (price: number) => {
@@ -153,7 +286,7 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        {/* Model Selection & Compare Toggle */}
+        {/* Model Selection */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -161,113 +294,188 @@ const Index = () => {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => setCompareMode(!compareMode)}
+                onClick={() => setShowCart(!showCart)}
               >
-                <Icon name="GitCompare" size={16} className="mr-2" />
-                {compareMode ? 'Закрыть' : 'Сравнить'}
+                <Icon name="ShoppingCart" size={16} className="mr-2" />
+                Корзина ({getTotalCartItems()})
               </Button>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
               {models.map((model) => (
-                <div key={model.id} className="flex items-center gap-3">
-                  {compareMode && (
-                    <input
-                      type="checkbox"
-                      checked={compareModels.includes(model.id)}
-                      onChange={() => toggleCompareModel(model.id)}
-                      className="rounded border-gray-300"
-                    />
-                  )}
-                  <Card 
-                    className={`flex-1 cursor-pointer transition-all duration-300 hover:shadow-md ${
-                      selectedModel === model.id ? 'ring-2 ring-blue-500 scale-105' : 'hover:scale-102'
-                    }`}
-                    onClick={() => !compareMode && setSelectedModel(model.id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-semibold">{model.name}</h3>
-                        <div className="text-right">
-                          {model.originalPrice && (
-                            <div className="text-sm text-gray-500 line-through">
-                              {formatPrice(model.originalPrice)}
-                            </div>
-                          )}
-                          <div className="font-bold text-blue-600">
-                            {formatPrice(model.price)}
+                <Card 
+                  key={model.id}
+                  className={`cursor-pointer transition-all duration-300 hover:shadow-md ${
+                    selectedModel === model.id ? 'ring-2 ring-blue-500 scale-105' : 'hover:scale-102'
+                  }`}
+                  onClick={() => setSelectedModel(model.id)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-semibold">{model.name}</h3>
+                      <div className="text-right">
+                        {model.originalPrice && (
+                          <div className="text-sm text-gray-500 line-through">
+                            {formatPrice(model.originalPrice)}
                           </div>
+                        )}
+                        <div className="font-bold text-blue-600">
+                          от {formatPrice(Math.min(...suppliers.map(s => s.prices.wholesale)))}
                         </div>
                       </div>
-                      <div className="text-sm text-gray-600">
-                        {model.specs.processor} • {model.specs.memory} • {model.specs.storage}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {model.specs.processor} • {model.specs.memory} • {model.specs.storage}
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        {/* Comparison Table */}
-        {compareMode && compareModels.length > 1 && (
-          <Card>
+        {/* Suppliers Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Поставщики</CardTitle>
+            <p className="text-sm text-gray-600">Выберите поставщика для модели {currentModel?.name}</p>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="text-left p-3 font-medium">Поставщик</th>
+                    <th className="text-center p-3 font-medium">Остаток</th>
+                    <th className="text-center p-3 font-medium">Цена опт</th>
+                    <th className="text-center p-3 font-medium">НДС %</th>
+                    <th className="text-center p-3 font-medium">Действия</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {suppliers.map((supplier) => {
+                    const cartQuantity = getCartQuantity(supplier.id);
+                    return (
+                      <tr key={supplier.id} className="border-b hover:bg-gray-50 transition-colors">
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-lg">{supplier.logo}</span>
+                            <div>
+                              <div className="font-semibold">{supplier.name}</div>
+                              <div className="text-xs text-gray-500">
+                                ⭐ {supplier.rating} • {supplier.delivery.time}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-3 text-center">
+                          <Badge variant={supplier.stock > 10 ? 'default' : 'destructive'}>
+                            {supplier.stock} шт.
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-center font-semibold text-blue-600">
+                          {formatPrice(supplier.prices.wholesale)}
+                        </td>
+                        <td className="p-3 text-center">20%</td>
+                        <td className="p-3">
+                          <div className="flex items-center justify-center gap-2">
+                            {cartQuantity > 0 ? (
+                              <div className="flex items-center gap-1">
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => updateCartQuantity(supplier.id, cartQuantity - 1)}
+                                >
+                                  <Icon name="Minus" size={14} />
+                                </Button>
+                                <span className="mx-2 min-w-[20px] text-center">{cartQuantity}</span>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  onClick={() => updateCartQuantity(supplier.id, cartQuantity + 1)}
+                                  disabled={cartQuantity >= supplier.stock}
+                                >
+                                  <Icon name="Plus" size={14} />
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button 
+                                size="sm"
+                                onClick={() => addToCart(supplier.id)}
+                                disabled={supplier.stock === 0}
+                              >
+                                <Icon name="Plus" size={14} className="mr-1" />
+                                Добавить
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Shopping Cart */}
+        {showCart && cart.length > 0 && (
+          <Card className="animate-slide-up">
             <CardHeader>
-              <CardTitle className="text-lg">Сравнение моделей</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-lg">Корзина</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setShowCart(false)}
+                >
+                  <Icon name="X" size={16} />
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="text-left p-2 font-medium">Характеристика</th>
-                      {compareModels.map(modelId => {
-                        const model = models.find(m => m.id === modelId);
-                        return (
-                          <th key={modelId} className="text-center p-2 font-medium min-w-[100px]">
-                            {model?.name.split(' ').slice(-1)}
-                          </th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(models[0].specs).map(([key, _]) => (
-                      <tr key={key} className="border-b">
-                        <td className="p-2 font-medium capitalize">
-                          {key === 'processor' && 'Процессор'}
-                          {key === 'memory' && 'Память'}
-                          {key === 'storage' && 'Накопитель'}
-                          {key === 'display' && 'Дисплей'}
-                          {key === 'graphics' && 'Графика'}
-                          {key === 'battery' && 'Батарея'}
-                          {key === 'weight' && 'Вес'}
-                        </td>
-                        {compareModels.map(modelId => {
-                          const model = models.find(m => m.id === modelId);
-                          return (
-                            <td key={`${modelId}-${key}`} className="p-2 text-center text-xs">
-                              {model?.specs[key as keyof typeof model.specs]}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    ))}
-                    <tr>
-                      <td className="p-2 font-medium">Цена</td>
-                      {compareModels.map(modelId => {
-                        const model = models.find(m => m.id === modelId);
-                        return (
-                          <td key={`${modelId}-price`} className="p-2 text-center text-xs font-semibold text-blue-600">
-                            {model && formatPrice(model.price)}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  </tbody>
-                </table>
+              <div className="space-y-4">
+                {cart.map((item) => {
+                  const supplier = suppliers.find(s => s.id === item.supplierId);
+                  const model = models.find(m => m.id === item.modelId);
+                  return (
+                    <div key={`${item.supplierId}-${item.modelId}`} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <span className="text-lg">{supplier?.logo}</span>
+                        <div>
+                          <div className="font-semibold text-sm">{model?.name}</div>
+                          <div className="text-xs text-gray-600">{supplier?.name}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm">{item.quantity} шт.</span>
+                        <span className="font-semibold text-blue-600">
+                          {formatPrice(item.price * item.quantity)}
+                        </span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => removeFromCart(item.supplierId)}
+                        >
+                          <Icon name="Trash2" size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+                
+                <Separator />
+                
+                <div className="flex items-center justify-between text-lg font-bold">
+                  <span>Итого:</span>
+                  <span className="text-blue-600">{formatPrice(getTotalCartValue())}</span>
+                </div>
+                
+                <Button className="w-full" size="lg">
+                  Оформить заказ ({getTotalCartItems()} товаров)
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -276,10 +484,9 @@ const Index = () => {
         {/* Main Content Tabs */}
         <div className="lg:col-span-2">
         <Tabs defaultValue="specs" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="specs">Характеристики</TabsTrigger>
             <TabsTrigger value="description">Описание</TabsTrigger>
-            <TabsTrigger value="buy">Покупка</TabsTrigger>
           </TabsList>
 
           {/* Technical Specifications */}
@@ -383,81 +590,7 @@ const Index = () => {
             </Card>
           </TabsContent>
 
-          {/* Purchase Options */}
-          <TabsContent value="buy">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Варианты покупки</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold">Единовременная оплата</span>
-                        <span className="text-xl font-bold text-blue-600">
-                          {currentModel && formatPrice(currentModel.price)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        Полная стоимость товара. Бесплатная доставка.
-                      </p>
-                      <Button className="w-full mt-3">
-                        Купить сейчас
-                      </Button>
-                    </div>
 
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold">Рассрочка 0%</span>
-                        <span className="text-lg font-bold">
-                          {currentModel && formatPrice(Math.round(currentModel.price / 12))} × 12 мес.
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        Без переплат и первоначального взноса.
-                      </p>
-                      <Button variant="outline" className="w-full mt-3">
-                        Оформить рассрочку
-                      </Button>
-                    </div>
-
-                    <div className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-semibold">Trade-in</span>
-                        <span className="text-green-600 font-semibold">
-                          Скидка до 50 000 ₽
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600">
-                        Сдайте старое устройство и получите скидку на новое.
-                      </p>
-                      <Button variant="outline" className="w-full mt-3">
-                        Узнать стоимость
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 text-sm text-gray-600">
-                    <Icon name="Truck" size={18} />
-                    <span>Бесплатная доставка</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-600 mt-2">
-                    <Icon name="Shield" size={18} />
-                    <span>Гарантия 1 год</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-sm text-gray-600 mt-2">
-                    <Icon name="RotateCcw" size={18} />
-                    <span>Возврат 14 дней</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
         </Tabs>
         </div>
         </div>
