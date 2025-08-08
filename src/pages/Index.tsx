@@ -315,11 +315,17 @@ const Index = () => {
                       <div>
                         <h3 className="font-bold text-lg">{supplier.name}</h3>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
-                          <span>⭐ {supplier.rating}</span>
-                          <span>🚚 {supplier.delivery.time}</span>
                           <Badge variant={supplier.stock > 10 ? 'default' : 'destructive'}>
                             {supplier.stock} шт.
                           </Badge>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-6 px-2 text-xs"
+                          >
+                            <Icon name="MessageCircle" size={12} className="mr-1" />
+                            Чат
+                          </Button>
                         </div>
                       </div>
                     </div>
